@@ -1,0 +1,44 @@
+[
+    {
+        "transactionName": "medAssetExists",
+        "transactionLabel": "A test medAssetExists transaction",
+        "arguments": [
+            "001"
+        ],
+        "transientData": {}
+    },
+    {
+        "transactionName": "createMedAsset",
+        "transactionLabel": "A test createMedAsset transaction",
+        "arguments": [
+            "001",
+            "some value"
+        ],
+        "transientData": {}
+    },
+    {
+        "transactionName": "readMedAsset",
+        "transactionLabel": "A test readMedAsset transaction",
+        "arguments": [
+            "001"
+        ],
+        "transientData": {}
+    },
+    {
+        "transactionName": "updateMedAsset",
+        "transactionLabel": "A test updateMedAsset transaction",
+        "arguments": [
+            "001",
+            "some other value"
+        ],
+        "transientData": {}
+    },
+    {
+        "transactionName": "deleteMedAsset",
+        "transactionLabel": "A test deleteMedAsset transaction",
+        "arguments": [
+            "001"
+        ],
+        "transientData": {}
+    }
+]

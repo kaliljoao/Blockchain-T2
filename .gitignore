@@ -1,0 +1,12 @@
+newChaincode/.vscode
+newChaincode/test
+newChaincode/medication-contract@1.0.0.cds
+newChaincode/.gitignore
+newChaincode/.editorconfig
+newChaincode/.eslintignore
+newChaincode/.eslintrc.js
+newChaincode/node_modules
+bin/
+.DS_Store
+network/fabric-samples/*
+server/src/node_modules

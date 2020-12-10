@@ -6,7 +6,7 @@
 
 const { Contract } = require('fabric-contract-api');
 
-class MedicationContract extends Contract {
+class MedAssetContract extends Contract {
 
     async initLedger(ctx) {
         console.info('============= START : Initialize Ledger ===========');
@@ -15,8 +15,8 @@ class MedicationContract extends Contract {
                 manufacturer: '426R',
                 name: 'Dipirona',
                 dosage: '400',
-                fabDate: '1574973266',
-                expDate: '1665446400',
+                fabDate: '30/04/2019',
+                expDate: '30/04/2021',
                 status: "stock",
                 prescription: null
             },
@@ -24,8 +24,8 @@ class MedicationContract extends Contract {
                 manufacturer: 'J205',
                 name: 'Azitromicina',
                 dosage: '200',
-                fabDate: '1574973266',
-                expDate: '1665446400',
+                fabDate: '30/04/2019',
+                expDate: '30/04/2021',
                 status: "stock",
                 prescription: null
             }
@@ -182,7 +182,7 @@ class MedicationContract extends Contract {
         }
     }
     /* ============================FUNCOES PARA VENDA==============================*/
-    async createRegister(ctx, Id, medicationId, prescriptionId){
+    async createRegister(ctx, Id, medicationId, prescriptionId) {
         const med_JSON = await this.readMedication(ctx,medicationId);
         const pes_JSON = await this.queryPrescription(ctx,prescriptionId);
         const medication = Buffer.from(JSON.stringify(med_JSON));;
@@ -225,4 +225,4 @@ class MedicationContract extends Contract {
 
 }
 
-module.exports = MedicationContract;
+module.exports = MedAssetContract;
