@@ -93,6 +93,7 @@
 <script>
 import CreatePrescriptionModal from "@/views/pages/main/CreatePrescription";
 import DeleteConfirmationModal from "@/views/pages/DeleteConfirmationModal";
+import Service from "@/services/Service";
 
 export default {
   name: "PrescriptionsTable",
@@ -103,6 +104,7 @@ export default {
   },
 
   data: () => ({
+    client: new Service(),
     loading: false,
     dialog: false,
     delete_obj: null,
@@ -182,7 +184,10 @@ export default {
       },
     ],
   }),
-  async created() {},
+  async created() {
+    let arrPrescs = await this.client.getRequest("/get_all_presc");
+    console.log(arrPrescs);
+  },
   methods: {
     check_obj_name(id, list) {
       var filtered = list.filter((x) => x.id == id)[0];

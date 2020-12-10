@@ -83,7 +83,7 @@ export default class ApiClient {
       store.commit("loader/START_LOADING", event);
       Vue.http({
         method: method,
-        url: `http://localhost:8000${url}`,
+        url: `http://localhost:5000${url}`,
         body: bodyToSend,
         // headers: headers,
       })

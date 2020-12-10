@@ -75,7 +75,7 @@ module.exports = {
             const network = await gateway.getNetwork('mychannel');
     
             // Get the contract from the network.
-            const contract = network.getContract('medication-contract');
+            const contract = network.getContract('newChaincode');
     
             // Submit the specified transaction.
             console.log("Sumbmiting createPrescription Transaction");
@@ -115,7 +115,7 @@ module.exports = {
             const network = await gateway.getNetwork('mychannel');
     
             // Get the contract from the network.
-            const contract = network.getContract('medication-contract');
+            const contract = network.getContract('newChaincode');
     
             // Submit the specified transaction.
             const resultPrescription = await contract.submitTransaction('verifyPrescription', medicationId, prescriptionId);
@@ -236,7 +236,7 @@ module.exports = {
             const network = await gateway.getNetwork('mychannel');
     
             // Get the contract from the network.
-            const contract = network.getContract('medication-contract');
+            const contract = network.getContract('newChaincode');
             
             // Evaluate the specified transaction.
             const resultSales =  await contract.evaluateTransaction('queryAllSales');

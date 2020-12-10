@@ -6,6 +6,7 @@ newChaincode/.editorconfig
 newChaincode/.eslintignore
 newChaincode/.eslintrc.js
 newChaincode/node_modules
+front/node_modules
 bin/
 .DS_Store
 network/fabric-samples/*
