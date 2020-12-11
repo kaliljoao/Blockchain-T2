@@ -95,12 +95,12 @@ export default {
   name: "CreatePrescriptionModal",
 
   props: {
-    prescription_prop: Object,
+    prescription_prop: Array,
     prescriptions_size: Number,
-    doctors: Object,
-    patients: Object,
-    hospitals: Object,
-    medications: Object,
+    doctors: Array,
+    patients: Array,
+    hospitals: Array,
+    medications: Array,
   },
 
   async created() {
@@ -116,7 +116,7 @@ export default {
     } else {
       this.edit = false;
       this.prescription = {
-        prescriptionId: "PRE" + ("0" + (this.prescriptions_size + 1).toString()).slice(-2),
+        prescriptionId: "PES" + ((this.prescriptions_size + 1).toString()),
         medications: [],
         hospitalId: null,
         doctorId: null,

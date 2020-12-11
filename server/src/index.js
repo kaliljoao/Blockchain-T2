@@ -12,46 +12,85 @@ const ccpPath = path.resolve(__dirname, 'connection-org1.json');
 
 module.exports = {
     createMedication: async(medicationId, manufactorId, medicationName, medicationExpDate) => {
-    try {
-    
-        // Create a new file system based wallet for managing identities.
-        const walletPath = path.join(process.cwd(), 'wallet');
-        const wallet = new FileSystemWallet(walletPath);
-        console.log(`Wallet path: ${walletPath}`);
-    
-        // Check to see if we've already enrolled the user.
-        const userExists = await wallet.exists('user1');
-        if (!userExists) {
-            console.log('An identity for the user "user1" does not exist in the wallet');
-            console.log('Run the registerUser.js application before retrying');
-            return;
+        try {
+        
+            // Create a new file system based wallet for managing identities.
+            const walletPath = path.join(process.cwd(), 'wallet');
+            const wallet = new FileSystemWallet(walletPath);
+            console.log(`Wallet path: ${walletPath}`);
+        
+            // Check to see if we've already enrolled the user.
+            const userExists = await wallet.exists('user1');
+            if (!userExists) {
+                console.log('An identity for the user "user1" does not exist in the wallet');
+                console.log('Run the registerUser.js application before retrying');
+                return;
+            }
+        
+            // Create a new gateway for connecting to our peer node.
+            const gateway = new Gateway();
+            await gateway.connect(ccpPath, { wallet, identity: 'user1', discovery: { enabled: true, asLocalhost: true } });
+
+            // Get the network (channel) our contract is deployed to.
+            const network = await gateway.getNetwork('mychannel');
+            console.log("flag3")
+
+            // Get the contract from the network.
+            const contract = network.getContract('newChaincode');
+            console.log("flag4")
+
+            // Submit the specified transaction.
+            await contract.submitTransaction('createMedAsset', medicationId, JSON.stringify({ id: medicationId, manufactor: manufactorId, name: medicationName, expDate :medicationExpDate}));
+            console.log('Transaction has been submitted');
+        
+            // Disconnect from the gateway.
+            await gateway.disconnect();
+        
+        } catch (error) {
+            console.error(`Failed to submit transaction: ${error}`);
+            process.exit(1);
         }
-    
-        // Create a new gateway for connecting to our peer node.
-        const gateway = new Gateway();
-        await gateway.connect(ccpPath, { wallet, identity: 'user1', discovery: { enabled: true, asLocalhost: true } });
-
-        // Get the network (channel) our contract is deployed to.
-        const network = await gateway.getNetwork('mychannel');
-        console.log("flag3")
-
-        // Get the contract from the network.
-        const contract = network.getContract('newChaincode');
-        console.log("flag4")
-
-        // Submit the specified transaction.
-        await contract.submitTransaction('createMedAsset', medicationId, JSON.stringify({ id: medicationId, manufactor: manufactorId, name: medicationName, expDate :medicationExpDate}));
-        console.log('Transaction has been submitted');
-    
-        // Disconnect from the gateway.
-        await gateway.disconnect();
-    
-    } catch (error) {
-        console.error(`Failed to submit transaction: ${error}`);
-        process.exit(1);
-    }
     },
-    createPrescription: async(prescriptionId, medications, patientId, doctorId) => {
+    initLedger: async () => {
+        try {
+    
+            // Create a new file system based wallet for managing identities.
+            const walletPath = path.join(process.cwd(), 'wallet');
+            const wallet = new FileSystemWallet(walletPath);
+            console.log(`Wallet path: ${walletPath}`);
+    
+            // Check to see if we've already enrolled the user.
+            const userExists = await wallet.exists('user1');
+            if (!userExists) {
+                console.log('An identity for the user "user1" does not exist in the wallet');
+                console.log('Run the registerUser.js application before retrying');
+                return;
+            }
+    
+            // Create a new gateway for connecting to our peer node.
+            const gateway = new Gateway();
+            await gateway.connect(ccpPath, { wallet, identity: 'user1', discovery: { enabled: true, asLocalhost: true } });
+    
+            // Get the network (channel) our contract is deployed to.
+            const network = await gateway.getNetwork('mychannel');
+    
+            // Get the contract from the network.
+            const contract = network.getContract('newChaincode');
+    
+            // Submit the specified transaction.
+            console.log("Evaluating initLedger Transaction");
+            await contract.evaluateTransaction('initLedger');
+            console.log('Transaction has been evaluated');
+    
+            // Disconnect from the gateway.
+            await gateway.disconnect();
+    
+        } catch (error) {
+            console.error(`Failed to submit transaction: ${error}`);
+            process.exit(1);
+        }
+    }, 
+    createPrescription: async(prescriptionId, medications, patientId, doctorId, hospitalId) => {
         try {
     
             // Create a new file system based wallet for managing identities.
@@ -79,7 +118,7 @@ module.exports = {
     
             // Submit the specified transaction.
             console.log("Sumbmiting createPrescription Transaction");
-            await contract.submitTransaction('createPrescription', prescriptionId, medications, patientId, doctorId);
+            await contract.submitTransaction('createPrescription', prescriptionId, medications, patientId, doctorId, hospitalId);
             console.log('Transaction has been submitted');
     
             // Disconnect from the gateway.
@@ -118,10 +157,10 @@ module.exports = {
             const contract = network.getContract('newChaincode');
     
             // Submit the specified transaction.
-            const resultPrescription = await contract.submitTransaction('verifyPrescription', medicationId, prescriptionId);
+            // const resultPrescription = await contract.submitTransaction('verifyPrescription', medicationId, prescriptionId);
             
-            await contract.submitTransaction('updateMedication', medicationId, prescriptionId);
-            await contract.submitTransaction('createRegister', saleId, medicationId, prescriptionId);
+            // await contract.submitTransaction('updateMedication', medicationId, prescriptionId);
+            // await contract.submitTransaction('createRegister', saleId, medicationId, prescriptionId);
             console.log('Transaction has been submitted');
             
             // Disconnect from the gateway.
@@ -160,11 +199,11 @@ module.exports = {
             const contract = network.getContract('newChaincode');
     
 
-            await contract.evaluateTransaction('createMedications');
+            // await contract.evaluateTransaction('createMedications');
 
-            // Evaluate the specified transaction.
-            const resultMedication = await contract.submitTransaction('readMyAsset', "MED01");
-            console.log(`Medications: ${resultMedication.toString()}`);
+            // // Evaluate the specified transaction.
+            const resultMedication = await contract.evaluateTransaction('queryAllMedication');
+            console.log(`Medications: ${resultMedication}`);
     
             console.log("\n");
             return resultMedication;

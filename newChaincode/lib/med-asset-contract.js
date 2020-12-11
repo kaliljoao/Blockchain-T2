@@ -28,15 +28,45 @@ class MedAssetContract extends Contract {
                 expDate: '30/04/2021',
                 status: "stock",
                 prescription: null
+            },
+            {
+                manufacturer: 'J205',
+                name: 'Novalgina',
+                dosage: '200',
+                fabDate: '30/04/2019',
+                expDate: '30/04/2021',
+                status: "stock",
+                prescription: null
+            },
+            {
+                manufacturer: 'J205',
+                name: 'Ivermectina',
+                dosage: '200',
+                fabDate: '30/12/2019',
+                expDate: '30/12/2021',
+                status: "stock",
+                prescription: null
+            },
+            {
+                manufacturer: 'J205',
+                name: 'THC',
+                dosage: '200',
+                fabDate: '10/08/2019',
+                expDate: '10/08/2021',
+                status: "stock",
+                prescription: null
             }
         ];
 
         for (let i = 0; i < meds.length; i++) {
             meds[i].docType = 'med';
-            await ctx.stub.putState('MED' + i, Buffer.from(JSON.stringify(meds[i])));
-            console.info('Added <--> ', meds[i]);
+            if(!this.medicationExists(ctx, 'MED' + i)) {
+                await ctx.stub.putState('MED' + i, Buffer.from(JSON.stringify(meds[i])));
+                console.info('Added <--> ', meds[i]);
+            }
         }
         console.info('============= END : Initialize Ledger ===========');
+        return { meds : meds }
     }
 
     async medicationExists(ctx, medicationId) {
@@ -64,15 +94,82 @@ class MedAssetContract extends Contract {
         return asset;
     }
 
-    async updateMedication(ctx, medicationId, newValue) {
-        // TODO: Relacionar medicamento com uma venda e uma receita
+    async updateMedication(ctx, medicationId, prescriptionId) {
         const exists = await this.medicationExists(ctx, medicationId);
         if (!exists) {
             throw new Error(`The medication ${medicationId} does not exist`);
         }
-        const asset = { value: newValue };
+        const oldAsset = await this.readMedication(ctx, medicationId);
+        const oldPrescriptionAsset = await this.queryPrescription(ctx, prescriptionId)
+        if (oldAsset.status == "sold") {
+            return {
+                status: "error",
+                message: "This Medications has already been sold"
+            };
+        }
+        const asset = { 
+            manufacturer: oldAsset.manufacturer, 
+            name: oldAsset.name, 
+            dosage: oldAsset.dosage , 
+            fabDate: oldAsset.fabDate, 
+            expDate: oldAsset.fabDate, 
+            status: "sold", 
+            prescription: prescriptionId 
+        };
+        const newMedications = JSON.parse(oldPrescriptionAsset.medications);
+        console.log("newMedications 1:", newMedications)
+        newMedications.map((medication, index) => {
+            if(medication.name == asset.name) {
+                medication.status = "Used";
+            }
+            newMedications[index] = medication;
+        })
+        console.log("newMedications 2:", newMedications)
+        const newPrescriptionAsset = {  
+            prescriptionId: oldPrescriptionAsset.prescriptionId, 
+            medications: JSON.stringify(newMedications), 
+            patientId: oldPrescriptionAsset.patientId, 
+            doctorId: oldPrescriptionAsset.doctorId, 
+            hospitalId: oldPrescriptionAsset.doctorId
+        };
+        console.log("newPrescriptionAsset:", newPrescriptionAsset)
+        newPrescriptionAsset.stock = "Used";
         const buffer = Buffer.from(JSON.stringify(asset));
+        const prescriptionBuffer = Buffer.from(JSON.stringify(newPrescriptionAsset));
         await ctx.stub.putState(medicationId, buffer);
+        await ctx.stub.putState(prescriptionId, prescriptionBuffer);
+    }
+
+    async queryAllMedication(ctx){
+        const startKey = 'MED0';
+        const endKey = 'MED999';
+
+        const iterator = await ctx.stub.getStateByRange(startKey, endKey);
+
+        const allResults = [];
+        while (true) {
+            const res = await iterator.next();
+
+            if (res.value && res.value.value.toString()) {
+                console.log(res.value.value.toString('utf8'));
+
+                const Key = res.value.key;
+                let Record;
+                try {
+                    Record = JSON.parse(res.value.value.toString('utf8'));
+                } catch (err) {
+                    console.log(err);
+                    Record = res.value.value.toString('utf8');
+                }
+                allResults.push({ Key, Record });
+            }
+            if (res.done) {
+                console.log('end of data');
+                await iterator.close();
+                console.info(allResults);
+                return JSON.stringify(allResults);
+            }
+        }
     }
 
     async deleteMedication(ctx, medicationId) {
@@ -98,12 +195,12 @@ class MedAssetContract extends Contract {
      * @param {*} doctorId Identificacao do medico que fez a receita
      * @param {*} hospitalId Identificacao do hospital gerador da receita
      */
-    async createPrescription(ctx, prescriptionId, medications, patientId, doctorId) {
+    async createPrescription(ctx, prescriptionId, medications, patientId, doctorId, hospitalId) {
         const exists = await this.prescriptionExists(ctx, prescriptionId);
         if (exists) {
             throw new Error(`The prescription ${prescriptionId} already exists`);
         }
-        const hospitalId = "HOS01";
+
         // const parsedMedication = JSON.parse(medications);
         const asset = { prescriptionId, medications, patientId, doctorId, hospitalId };
         const buffer = Buffer.from(JSON.stringify(asset));

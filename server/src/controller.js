@@ -7,6 +7,12 @@ module.exports = {
       return res.send(response.toString());
     }
   },
+  async initLedger(req, res) {
+    const response = await functions.initLedger();
+    if( response )
+      return res.send(response.toString());
+    
+  },
   async queryAllPrescription(req, res) {
     const response = await functions.queryAllPrescriptions();
     return res.send(response.toString());
@@ -41,12 +47,14 @@ module.exports = {
     const { medications } = req.body;
     const { patientId } = req.body;
     const { doctorId } = req.body;
+    const { hospitalId } = req.body;
     try {
       await functions.createPrescription(
         prescriptionId,
         JSON.stringify(medications),
         patientId,
-        doctorId
+        doctorId,
+        hospitalId
       );
       return res.send({ status: "ok", message: "" });
     } catch (err) {

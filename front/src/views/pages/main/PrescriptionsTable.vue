@@ -32,10 +32,10 @@
 
         <tbody>
           <tr v-for="(p, index) in prescriptions" :key="index">
-            <td>{{ p.medications.length }}</td>
-            <td>{{ check_obj_name(p.patientId, patients) }}</td>
-            <td>{{ check_obj_name(p.doctorId, doctors) }}</td>
-            <td>{{ check_obj_name(p.hospitalId, hospitals) }}</td>
+            <td>{{ p.Record.medications.length }}</td>
+            <td>{{ check_obj_name(p.Record.patientId, patients) }}</td>
+            <td>{{ check_obj_name(p.Record.doctorId, doctors) }}</td>
+            <td>{{ check_obj_name(p.Record.hospitalId, hospitals) }}</td>
             <!-- <td class="text-center">
               <v-btn
                 class="px-2 ml-1 secondary"
@@ -112,39 +112,33 @@ export default {
     delete_dialog: false,
     editPrescription: null,
     prescriptions: [
-      {
-        prescriptionId: "PRE01",
-        medications: ["MED01", "MED02"],
-        hospitalId: "HOS03",
-        doctorId: "DOC01",
-        patientId: "PAT01",
-      },
+      
     ],
     doctors: [
       {
-        id: "DOC01",
+        id: "DOC1",
         name: "Caio Melo",
       },
       {
-        id: "DOC02",
+        id: "DOC2",
         name: "Albert Einstein",
       },
       {
-        id: "DOC03",
+        id: "DOC3",
         name: "Gabriel Barbosa",
       },
     ],
     patients: [
       {
-        id: "PAT01",
+        id: "PAT1",
         name: "Fernando Santos",
       },
       {
-        id: "PAT02",
+        id: "PAT2",
         name: "João Pedro Kalil",
       },
       {
-        id: "PAT03",
+        id: "PAT3",
         name: "Neymar Júnior",
       },
     ],
@@ -163,34 +157,25 @@ export default {
       },
     ],
     medications: [
-      {
-        id: "MED01",
-        manufacturer: "426R",
-        name: "Dipirona",
-        dosage: "400",
-        fabDate: "1574973266",
-        expDate: "1665446400",
-        status: "stock",
-        prescription: null,
-      },
-      {
-        id: "MED02",
-        manufacturer: "J205",
-        name: "Azitromicina",
-        dosage: "200",
-        fabDate: "1574973266",
-        expDate: "1665446400",
-        status: "stock",
-        prescription: null,
-      },
+      
     ],
   }),
   async created() {
+    await this.client.getRequest("/get_all_meds").then(resp => {
+      resp.forEach(el => {
+        this.medications.push(el.Record)
+      })
+    });
     this.prescriptions = await this.client.getRequest("/get_all_presc");
-    this.medications = await this.client.getRequest("/get_all_meds");
+    this.prescriptions.forEach(element => {
+      element.Record.medications = element.Record.medications.substring(1).split(',');
+    });
+
+    // this.medications = await this.client.getRequest("/get_all_meds");
   },
   methods: {
     check_obj_name(id, list) {
+      console.log(list)
       var filtered = list.filter((x) => x.id == id)[0];
       return filtered.name;
     },

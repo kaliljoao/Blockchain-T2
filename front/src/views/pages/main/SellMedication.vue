@@ -12,19 +12,19 @@
         :lazy-validation="lazy"
       >
         <v-select
-          v-model="prescription.medications"
+          v-model="sale.medicationId"
           :items="medications"
           item-text="name"
           item-value="id"
           :rules="[required]"
           label="Medications"
           multiple
-          hint="Select medications for the prescription"
+          hint="Select medications for the prescriptions"
           persistent-hint
         ></v-select>
 
         <v-select
-          v-model="prescription.prescriptionId"
+          v-model="sale.prescriptionId"
           :items="prescriptions"
           item-text="prescriptionId"
           :rules="[required]"
@@ -74,11 +74,12 @@ export default {
 
   props: {
     sales_size: Number,
-    prescriptions: Object,
-    medications: Object,
+    prescriptions: Array,
+    medications: Array,
   },
 
   async created() {
+    this.service = new Service();
       this.sale = {
         saleId: "SAL" + ("0" + (this.sales_size + 1).toString()).slice(-2),
         medicationId: null,
@@ -87,14 +88,14 @@ export default {
   },
 
   data: () => ({
-    client: new Service(),
+      service: null,
       loading: false,
       valid: true,
       lazy: false,
       error: null,
 
       sale: {
-        saleId: "SAL" + ("0" + (this.sales_size + 1).toString()).slice(-2),
+        saleId: "SAL" + ("0" + (this.sales_size + 1).toString()),
         medicationId: null,
         prescriptionId: null,
       },
@@ -119,21 +120,15 @@ export default {
       }
     },
 
-    submit: async function () {
-      this.error = null;
-
-      this.client
+    async submit() {
+      console.log(this.service)
+      this.sale.medicationId = this.sale.medicationId[0];
+      this.service
         .postRequest("/sell_med", this.sale)
         .then((resp) => {
           this.$emit("close", this.sale);
         })
         .catch((error) => {});
-
-      // if (this.edit) {
-      //   this.$emit("close", this.prescription);
-      // } else {
-      //   this.$emit("close", this.prescription);
-      // }
     },
   },
 };

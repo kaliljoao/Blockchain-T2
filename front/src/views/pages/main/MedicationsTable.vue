@@ -10,7 +10,7 @@
       <v-btn
         color="green"
         rounded
-        @click="open_sell_dialog(null)"
+        @click="open_dialog(null)"
         absolute
         fab
         top
@@ -47,12 +47,12 @@
       </v-simple-table>
     </base-material-card>
     <v-dialog v-if="dialog" v-model="dialog" max-width="40%" scrollable>
-      <CreatePrescriptionModal
+      <SellMedication
         :sales_size="sales.length"
         :medications="medications"
         :prescriptions="prescriptions"
         @close="reset_dialog"
-      ></CreatePrescriptionModal>
+      ></SellMedication>
     </v-dialog>
   </v-container>
   <v-container v-else>
@@ -81,31 +81,30 @@ export default {
     loading: false,
     sales: [],
     prescriptions: [],
-    medications: [
-      {
-        manufacturer: "426R",
-        name: "Dipirona",
-        dosage: "400",
-        fabDate: "1574973266",
-        expDate: "1665446400",
-        status: "stock",
-        prescription: null,
-      },
-      {
-        manufacturer: "J205",
-        name: "Azitromicina",
-        dosage: "200",
-        fabDate: "1574973266",
-        expDate: "1665446400",
-        status: "stock",
-        prescription: null,
-      },
-    ],
+    dialog: false,
+    medications: [],
   }),
   async created() {
-    this.medications = await this.client.getRequest("/get_all_meds");
+    // this.medications = await this.client.getRequest("/get_all_meds");
+    // await this.client.getRequest("/init_ledger");
+    await this.client.getRequest("/get_all_meds").then(resp => {
+      resp.forEach(el => {
+        this.medications.push(el.Record)
+      })
+    });
     this.sales = await this.client.getRequest("/get_all_sells");
-    this.prescriptions = await this.client.getRequest("/get_all_presc");
+    await this.client.getRequest("/get_all_presc").then(resp => {
+      resp.forEach(el => {
+        this.prescriptions.push(el.Record)
+      })
+    });
+    this.prescriptions.forEach(element => {
+      let tam = element.medications.length;
+      element.medications = element.medications.substring(1,tam-1).split(',');
+    });
+    console.log(this.medications);
+    console.log(this.prescriptions);
+    // this.prescriptions = await this.client.getRequest("/get_all_presc");
   },
   methods: {
     open_dialog: function () {

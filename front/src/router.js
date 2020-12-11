@@ -10,6 +10,7 @@ export default new Router({
     {
       path: '/',
       component: () => import('@/views/dashboard/Index'),
+      redirect: "Medications",
       children: [
         {
           name: 'Medications',
