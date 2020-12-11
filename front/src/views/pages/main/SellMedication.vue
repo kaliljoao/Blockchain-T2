@@ -2,7 +2,7 @@
   <!-- <v-container id="add-user-modal" fluid tag="section"> -->
   <v-card>
     <v-card-title>
-      <h4>Add Prescription</h4>
+      <h4>Sell Medication</h4>
     </v-card-title>
     <v-card-text>
       <v-form
@@ -24,35 +24,13 @@
         ></v-select>
 
         <v-select
-          v-model="prescription.patientId"
-          :items="patients"
-          item-text="name"
+          v-model="prescription.prescriptionId"
+          :items="prescriptions"
+          item-text="prescriptionId"
           :rules="[required]"
           item-value="id"
-          label="Patient"
-          hint="Select the patient"
-          persistent-hint
-        ></v-select>
-
-        <v-select
-          v-model="prescription.doctorId"
-          :items="doctors"
-          item-text="name"
-          :rules="[required]"
-          item-value="id"
-          label="Doctor"
-          hint="Select the doctor writing the prescription"
-          persistent-hint
-        ></v-select>
-
-        <v-select
-          v-model="prescription.hospitalId"
-          :items="hospitals"
-          item-text="name"
-          :rules="[required]"
-          item-value="id"
-          label="Hospital"
-          hint="Select the hospital"
+          label="Prescription"
+          hint="Select the prescription"
           persistent-hint
         ></v-select>
 
@@ -95,50 +73,30 @@ export default {
   name: "CreatePrescriptionModal",
 
   props: {
-    prescription_prop: Object,
-    prescriptions_size: Number,
-    doctors: Object,
-    patients: Object,
-    hospitals: Object,
+    sales_size: Number,
+    prescriptions: Object,
     medications: Object,
   },
 
   async created() {
-    if (this.prescription_prop != null) {
-      this.edit = true;
-      this.prescription = {
-        prescriptionId: this.prescription_prop.prescriptionId,
-        medications: this.prescription_prop.medications,
-        hospitalId: this.prescription_prop.hospitalId,
-        doctorId: this.prescription_prop.doctorId,
-        patientId: this.prescription_prop.patientId,
+      this.sale = {
+        saleId: "SAL" + ("0" + (this.sales_size + 1).toString()).slice(-2),
+        medicationId: null,
+        prescriptionId: null,
       };
-    } else {
-      this.edit = false;
-      this.prescription = {
-        prescriptionId: "PRE" + ("0" + (this.prescriptions_size + 1).toString()).slice(-2),
-        medications: [],
-        hospitalId: null,
-        doctorId: null,
-        patientId: null,
-      };
-    }
   },
 
   data: () => ({
     client: new Service(),
       loading: false,
-      edit: false,
       valid: true,
       lazy: false,
       error: null,
 
-      prescription: {
+      sale: {
+        saleId: "SAL" + ("0" + (this.sales_size + 1).toString()).slice(-2),
+        medicationId: null,
         prescriptionId: null,
-        medications: [],
-        hospitalId: null,
-        doctorId: null,
-        patientId: null,
       },
   }),
   computed: {
@@ -165,9 +123,9 @@ export default {
       this.error = null;
 
       this.client
-        .postRequest("/create_pres", this.prescription)
+        .postRequest("/sell_med", this.sale)
         .then((resp) => {
-          this.$emit("close", this.prescription);
+          this.$emit("close", this.sale);
         })
         .catch((error) => {});
 

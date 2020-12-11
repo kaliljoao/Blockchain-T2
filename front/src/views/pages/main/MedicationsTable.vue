@@ -7,6 +7,17 @@
       color="secondary"
       class="px-5 py-3 mb-5"
     >
+      <v-btn
+        color="green"
+        rounded
+        @click="open_sell_dialog(null)"
+        absolute
+        fab
+        top
+        right
+      >
+        <v-icon large>mdi-plus</v-icon>
+      </v-btn>
       <v-simple-table>
         <thead>
           <tr>
@@ -35,6 +46,14 @@
         </tbody>
       </v-simple-table>
     </base-material-card>
+    <v-dialog v-if="dialog" v-model="dialog" max-width="40%" scrollable>
+      <CreatePrescriptionModal
+        :sales_size="sales.length"
+        :medications="medications"
+        :prescriptions="prescriptions"
+        @close="reset_dialog"
+      ></CreatePrescriptionModal>
+    </v-dialog>
   </v-container>
   <v-container v-else>
     <v-progress-circular
@@ -47,14 +66,21 @@
 </template>
 
 <script>
+import Service from "@/services/Service";
+import SellMedication from "./SellMedication";
 
 export default {
   name: "MedicationsTable",
 
-  components: {},
+  components: {
+    SellMedication,
+  },
 
   data: () => ({
+    client: new Service(),
     loading: false,
+    sales: [],
+    prescriptions: [],
     medications: [
       {
         manufacturer: "426R",
@@ -76,7 +102,21 @@ export default {
       },
     ],
   }),
-  async created() {},
-  methods: {},
+  async created() {
+    this.medications = await this.client.getRequest("/get_all_meds");
+    this.sales = await this.client.getRequest("/get_all_sells");
+    this.prescriptions = await this.client.getRequest("/get_all_presc");
+  },
+  methods: {
+    open_dialog: function () {
+      this.dialog = true;
+    },
+    reset_dialog(sale) {
+      if (sale != null) {
+        this.sales.push(sale);
+      }
+      this.dialog = false;
+    },
+  },
 };
 </script>

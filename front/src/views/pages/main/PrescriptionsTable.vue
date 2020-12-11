@@ -64,6 +64,7 @@
     <v-dialog v-if="dialog" v-model="dialog" max-width="40%" scrollable>
       <CreatePrescriptionModal
         :prescription_prop="editPrescription"
+        :prescriptions_size="prescriptions.length"
         :doctors="doctors"
         :patients="patients"
         :medications="medications"
@@ -185,8 +186,8 @@ export default {
     ],
   }),
   async created() {
-    let arrPrescs = await this.client.getRequest("/get_all_presc");
-    console.log(arrPrescs);
+    this.prescriptions = await this.client.getRequest("/get_all_presc");
+    this.medications = await this.client.getRequest("/get_all_meds");
   },
   methods: {
     check_obj_name(id, list) {
